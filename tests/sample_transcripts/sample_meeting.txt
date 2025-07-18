@@ -1,0 +1,35 @@
+John Smith: Good morning everyone, thanks for joining our quarterly review meeting. Let's start with the agenda items we discussed in the pre-meeting.
+
+Sarah Johnson: Thanks John. I have the Q3 financial report ready. Overall, we've seen a 15% increase in revenue compared to Q2, which puts us ahead of our projections.
+
+Mike Davis: That's great news Sarah. What about customer acquisition costs? I know that was a concern last quarter.
+
+Sarah Johnson: CAC is actually down 8% from last quarter. Our new digital marketing strategy is really paying off. The cost per lead has decreased significantly.
+
+John Smith: Excellent work, Sarah. That brings me to our next agenda item - the Q4 budget planning. Mike, can you walk us through the proposed allocations?
+
+Mike Davis: Absolutely. Based on the Q3 performance, I'm recommending we increase the marketing budget by 20% for Q4. We should also invest more in our engineering team to support the product roadmap.
+
+Lisa Chen: I agree with the marketing increase, but I have concerns about the engineering budget. Are we sure we can find qualified candidates in this market?
+
+Mike Davis: Valid point, Lisa. I've been working with HR and we have a good pipeline of candidates. I think we can fill the key positions by December.
+
+John Smith: Okay, let's make a decision on this. We'll approve the 20% marketing budget increase. Mike, please work with Lisa to finalize the engineering hiring plan by next Friday.
+
+Sarah Johnson: I'll need those budget numbers to update our quarterly projections. Mike, can you send me the detailed breakdown by Wednesday?
+
+Mike Davis: Will do, Sarah. I'll include the salary projections for the new hires as well.
+
+Lisa Chen: One more thing - we need to schedule the all-hands meeting for next month. I'll coordinate with everyone's calendars and send out invites by the end of this week.
+
+John Smith: Perfect. Any other business before we wrap up?
+
+Sarah Johnson: Just a quick reminder that the board presentation is scheduled for October 15th. I'll need input from all department heads by October 10th.
+
+Mike Davis: I'll have the product roadmap slides ready by then.
+
+Lisa Chen: And I'll prepare the HR metrics and hiring timeline.
+
+John Smith: Great, looks like we have our action items sorted. Thanks everyone for a productive meeting. Let's reconvene in two weeks for our next check-in.
+
+[Meeting ended at 10:47 AM]
