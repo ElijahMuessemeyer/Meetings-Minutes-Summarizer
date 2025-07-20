@@ -6,8 +6,11 @@ It cleans up the raw text and prepares it for further processing.
 """
 
 import re
+import logging
 from typing import List, Dict, Optional
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -160,6 +163,6 @@ if __name__ == "__main__":
     parser = TranscriptParser()
     result = parser.parse(sample_transcript)
     
-    print(f"Speakers found: {result.speakers}")
-    print(f"Word count: {result.total_words}")
-    print(f"Processing estimate: {parser.estimate_processing_time(result.total_words)}")
+    logger.info(f"Speakers found: {result.speakers}")
+    logger.info(f"Word count: {result.total_words}")
+    logger.info(f"Processing estimate: {parser.estimate_processing_time(result.total_words)}")

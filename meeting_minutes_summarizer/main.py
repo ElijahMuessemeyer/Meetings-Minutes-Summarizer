@@ -8,15 +8,18 @@ This is the entry point that ties together parsing, chunking, summarization, and
 from typing import Optional, List
 import sys
 import os
+import logging
 from dataclasses import dataclass
 
 # Import our components
-from transcript_parser import TranscriptParser, ParsedTranscript
-from chunker import TranscriptChunker, TextChunk
-from summarizer import MeetingSummarizer, MeetingSummary
-from action_extractor import ActionItemExtractor
-from report_generator import MeetingMinutesReportGenerator, ReportConfig
+from .transcript_parser import TranscriptParser, ParsedTranscript
+from .chunker import TranscriptChunker, TextChunk
+from .summarizer import MeetingSummarizer, MeetingSummary
+from .action_extractor import ActionItemExtractor
+from .report_generator import MeetingMinutesReportGenerator, ReportConfig
 
+# Configure logging
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ProcessingConfig:
@@ -71,31 +74,31 @@ class MeetingMinutesProcessor:
         Returns:
             Formatted meeting minutes as string
         """
-        print(f"Processing transcript for: {meeting_title}")
-        print(f"Input length: {len(raw_transcript)} characters")
+        logger.info(f"Processing transcript for: {meeting_title}")
+        logger.info(f"Input length: {len(raw_transcript)} characters")
         
         # Parse transcript
-        print("\n1. Parsing transcript...")
+        logger.info("Parsing transcript...")
         parsed_transcript = self.parser.parse(raw_transcript)
-        print(f"   Found {len(parsed_transcript.speakers)} speakers")
-        print(f"   Cleaned text: {parsed_transcript.total_words} words")
-        print(f"   Processing estimate: {self.parser.estimate_processing_time(parsed_transcript.total_words)}")
+        logger.info(f"Found {len(parsed_transcript.speakers)} speakers")
+        logger.info(f"Cleaned text: {parsed_transcript.total_words} words")
+        logger.info(f"Processing estimate: {self.parser.estimate_processing_time(parsed_transcript.total_words)}")
         
         # Chunk transcript
-        print("\n2. Chunking transcript...")
+        logger.info("Chunking transcript...")
         chunks = self.chunker.chunk_transcript(
             parsed_transcript.cleaned_text, 
             parsed_transcript.speakers
         )
         chunking_summary = self.chunker.get_chunking_summary(chunks)
-        print(f"   Created {chunking_summary['total_chunks']} chunks")
-        print(f"   Average chunk size: {chunking_summary['avg_words_per_chunk']} words")
+        logger.info(f"Created {chunking_summary['total_chunks']} chunks")
+        logger.info(f"Average chunk size: {chunking_summary['avg_words_per_chunk']} words")
         
         # Summarize chunks
-        print("\n3. Summarizing chunks...")
+        logger.info("Summarizing chunks...")
         chunk_summaries = []
         for i, chunk in enumerate(chunks):
-            print(f"   Processing chunk {i+1}/{len(chunks)}")
+            logger.debug(f"Processing chunk {i+1}/{len(chunks)}")
             
             context = ""
             if chunk_summaries:
@@ -109,7 +112,7 @@ class MeetingMinutesProcessor:
             chunk_summaries.append(chunk_summary)
         
         # Extract action items
-        print("\n4. Extracting action items...")
+        logger.info("Extracting action items...")
         additional_actions = self.action_extractor.extract_action_items(
             parsed_transcript.cleaned_text,
             parsed_transcript.speakers
@@ -119,10 +122,10 @@ class MeetingMinutesProcessor:
             action for action in additional_actions 
             if action.confidence >= self.config.min_action_confidence
         ]
-        print(f"   Found {len(high_confidence_actions)} high-confidence action items")
+        logger.info(f"Found {len(high_confidence_actions)} high-confidence action items")
         
         # Generate final summary
-        print("\n5. Generating final summary...")
+        logger.info("Generating final summary...")
         meeting_summary = self.summarizer.combine_summaries(chunk_summaries)
         
         combined_actions = self._merge_action_items(
@@ -132,13 +135,13 @@ class MeetingMinutesProcessor:
         meeting_summary.action_items = combined_actions
         
         # Format report
-        print("\n6. Formatting report...")
+        logger.info("Formatting report...")
         final_report = self.report_generator.generate_report(
             meeting_summary, 
             self.config.output_format
         )
         
-        print(f"\nProcessing complete! Generated {len(final_report)} character report.")
+        logger.info(f"Processing complete! Generated {len(final_report)} character report.")
         return final_report
     
     def process_file(self, file_path: str, output_path: str = None) -> str:
@@ -164,6 +167,16 @@ class MeetingMinutesProcessor:
         # Extract meeting title from filename
         meeting_title = os.path.splitext(os.path.basename(file_path))[0]
         
+        # Determine output format from file extension if output_path is provided
+        if output_path:
+            _, ext = os.path.splitext(output_path)
+            if ext.lower() == '.html':
+                self.config.output_format = 'html'
+            elif ext.lower() == '.txt':
+                self.config.output_format = 'text'
+            else:
+                self.config.output_format = 'markdown'
+        
         # Process transcript
         result = self.process_transcript(raw_transcript, meeting_title)
         
@@ -172,9 +185,9 @@ class MeetingMinutesProcessor:
             try:
                 with open(output_path, 'w', encoding='utf-8') as f:
                     f.write(result)
-                print(f"Output saved to: {output_path}")
+                logger.info(f"Output saved to: {output_path}")
             except Exception as e:
-                print(f"Warning: Could not save to {output_path}: {str(e)}")
+                logger.warning(f"Could not save to {output_path}: {str(e)}")
         
         return result
     
@@ -234,11 +247,20 @@ class MeetingMinutesProcessor:
         return similarity > 0.7
 
 
-def main():
+def main() -> None:
     """Command line interface for the meeting minutes processor."""
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    
     if len(sys.argv) < 2:
-        print("Usage: python main.py <transcript_file> [output_file]")
-        print("Example: python main.py sample_transcript.txt meeting_minutes.md")
+        print("Usage: python -m meeting_minutes_summarizer.main <transcript_file> [output_file]")
+        print("Example: python -m meeting_minutes_summarizer.main sample_transcript.txt meeting_minutes.md")
         sys.exit(1)
     
     input_file = sys.argv[1]
@@ -263,7 +285,7 @@ def main():
             print(result)
             
     except Exception as e:
-        print(f"Error processing transcript: {str(e)}")
+        logger.error(f"Error processing transcript: {str(e)}")
         sys.exit(1)
 
 

@@ -8,6 +8,9 @@ Smart chunking preserves context and speaker continuity.
 from typing import List, Dict, Tuple
 from dataclasses import dataclass
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -197,7 +200,8 @@ if __name__ == "__main__":
     
     John Smith: Excellent. Mike, can you update us on the product development timeline?
     
-    Mike Davis: Sure. The new feature set will be ready for beta testing next month. We need to coordinate with the QA team.
+    Mike Davis: Sure. The new feature set will be ready for beta testing next month. 
+    We need to coordinate with the QA team.
     
     Lisa Chen: I can handle the QA coordination. We should also plan user acceptance testing.
     
@@ -207,6 +211,6 @@ if __name__ == "__main__":
     chunker = TranscriptChunker(max_words_per_chunk=50)
     chunks = chunker.chunk_transcript(sample_text)
     
-    print(f"Created {len(chunks)} chunks:")
+    logger.info(f"Created {len(chunks)} chunks:")
     for chunk in chunks:
-        print(f"Chunk {chunk.chunk_id}: {chunk.word_count} words, speakers: {chunk.speakers_in_chunk}")
+        logger.debug(f"Chunk {chunk.chunk_id}: {chunk.word_count} words, speakers: {chunk.speakers_in_chunk}")

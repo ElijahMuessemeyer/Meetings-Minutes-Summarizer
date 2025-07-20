@@ -13,15 +13,15 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="meeting-minutes-summarizer",
-    version="1.0.0",
+    version="1.0.1",
     author="Elijah Muessemeyer",
-    author_email="elijahmuesse@gmail.com",
-    description="An AI-powered system that transforms meeting transcripts into professional minutes",
+    author_email="elijah@muessemeyer.com",
+    description="AI-powered system using Claude/OpenAI to transform meeting transcripts into professional minutes",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ElijahMuessemeyer/meeting-minutes-summarizer",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    url="https://github.com/meeting-minutes-summarizer/meeting-minutes-summarizer",
+    packages=find_packages(),
+    package_dir={},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -42,13 +42,13 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "meeting-minutes-summarizer=main:main",
+            "meeting-minutes-summarizer=meeting_minutes_summarizer.main:main",
         ],
     },
-    keywords="meeting minutes ai summarization transcription productivity",
+    keywords="meeting minutes ai claude openai summarization transcription productivity",
     project_urls={
-        "Bug Reports": "https://github.com/ElijahMuessemeyer/meeting-minutes-summarizer/issues",
-        "Source": "https://github.com/ElijahMuessemeyer/meeting-minutes-summarizer",
-        "Documentation": "https://github.com/ElijahMuessemeyer/meeting-minutes-summarizer#readme",
+        "Bug Reports": "https://github.com/meeting-minutes-summarizer/meeting-minutes-summarizer/issues",
+        "Source": "https://github.com/meeting-minutes-summarizer/meeting-minutes-summarizer",
+        "Documentation": "https://github.com/meeting-minutes-summarizer/meeting-minutes-summarizer#readme",
     },
 )

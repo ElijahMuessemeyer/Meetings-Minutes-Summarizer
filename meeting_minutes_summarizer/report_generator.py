@@ -9,6 +9,10 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 from datetime import datetime
 import json
+import logging
+import html
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -131,7 +135,10 @@ class MeetingMinutesReportGenerator:
                     report_lines.append(f"\n{owner}:")
                     for action in actions:
                         deadline_str = f" (Due: {action['deadline']})" if action['deadline'] != 'TBD' else ""
-                        priority_str = f" [{action.get('priority', 'medium').upper()}]" if action.get('priority') != 'medium' else ""
+                        priority_str = (
+                            f" [{action.get('priority', 'medium').upper()}]"
+                            if action.get('priority') != 'medium' else ""
+                        )
                         report_lines.append(f"  • {action['task']}{deadline_str}{priority_str}")
             else:
                 for i, action in enumerate(summary.action_items, 1):
@@ -229,7 +236,10 @@ class MeetingMinutesReportGenerator:
                 
                 for action in actions_by_priority:
                     deadline_str = f" **Due:** {action['deadline']}" if action['deadline'] != 'TBD' else ""
-                    priority_str = f" `{action.get('priority', 'medium').upper()}`" if action.get('priority') != 'medium' else ""
+                    priority_str = (
+                        f" `{action.get('priority', 'medium').upper()}`"
+                        if action.get('priority') != 'medium' else ""
+                    )
                     lines.append(f"- {action['task']}{deadline_str}{priority_str}")
                 
                 lines.append("")
@@ -240,7 +250,10 @@ class MeetingMinutesReportGenerator:
             for i, action in enumerate(sorted_actions, 1):
                 owner_str = f" - **Owner:** {action['owner']}" if action['owner'] != 'TBD' else ""
                 deadline_str = f" - **Due:** {action['deadline']}" if action['deadline'] != 'TBD' else ""
-                priority_str = f" - **Priority:** {action.get('priority', 'medium').title()}" if action.get('priority') != 'medium' else ""
+                priority_str = (
+                    f" - **Priority:** {action.get('priority', 'medium').title()}"
+                    if action.get('priority') != 'medium' else ""
+                )
                 
                 lines.append(f"{i}. {action['task']}")
                 if owner_str or deadline_str or priority_str:
@@ -276,30 +289,78 @@ class MeetingMinutesReportGenerator:
         return lines
     
     def _generate_html_report(self, summary) -> str:
-        """Generate HTML report (basic implementation)."""
-        # Convert markdown to basic HTML
+        """Generate HTML report with proper escaping and structure."""
+        # Convert markdown to HTML with security
         markdown_report = self._generate_markdown_report(summary)
         
-        # Simple markdown to HTML conversion
-        html_lines = ["<html><head><title>Meeting Minutes</title></head><body>"]
+        # Improved HTML conversion with escaping
+        html_lines = [
+            "<!DOCTYPE html>",
+            "<html lang='en'>",
+            "<head>",
+            "    <meta charset='UTF-8'>",
+            "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>",
+            "    <title>Meeting Minutes</title>",
+            "    <style>",
+            "        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }",
+            "        h1, h2, h3 { color: #333; }",
+            "        ul { padding-left: 20px; }",
+            "        hr { margin: 20px 0; border: 1px solid #eee; }",
+            "        .metadata { color: #666; font-style: italic; }",
+            "    </style>",
+            "</head>",
+            "<body>"
+        ]
+        
+        in_list = False
         
         for line in markdown_report.split('\n'):
             if line.startswith('# '):
-                html_lines.append(f"<h1>{line[2:]}</h1>")
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
+                html_lines.append(f"<h1>{html.escape(line[2:])}</h1>")
             elif line.startswith('## '):
-                html_lines.append(f"<h2>{line[3:]}</h2>")
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
+                html_lines.append(f"<h2>{html.escape(line[3:])}</h2>")
             elif line.startswith('### '):
-                html_lines.append(f"<h3>{line[4:]}</h3>")
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
+                html_lines.append(f"<h3>{html.escape(line[4:])}</h3>")
             elif line.startswith('- '):
-                html_lines.append(f"<li>{line[2:]}</li>")
+                if not in_list:
+                    html_lines.append("<ul>")
+                    in_list = True
+                html_lines.append(f"<li>{html.escape(line[2:])}</li>")
             elif line.strip() == "---":
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
                 html_lines.append("<hr>")
+            elif line.strip().startswith('**') and line.strip().endswith('**'):
+                # Handle metadata lines
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
+                html_lines.append(f"<p class='metadata'>{html.escape(line.strip())}</p>")
             elif line.strip():
-                html_lines.append(f"<p>{line}</p>")
+                if in_list:
+                    html_lines.append("</ul>")
+                    in_list = False
+                html_lines.append(f"<p>{html.escape(line)}</p>")
             else:
-                html_lines.append("<br>")
+                # Empty line - just add some space
+                if not in_list:
+                    html_lines.append("<br>")
         
-        html_lines.append("</body></html>")
+        # Close any open list
+        if in_list:
+            html_lines.append("</ul>")
+        
+        html_lines.extend(["</body>", "</html>"])
         return "\n".join(html_lines)
     
     def _group_actions_by_owner(self, action_items: List[Dict]) -> Dict[str, List[Dict]]:
@@ -351,7 +412,10 @@ if __name__ == "__main__":
     from types import SimpleNamespace
     
     mock_summary = SimpleNamespace(
-        overall_summary="Team discussed Q4 planning and resource allocation. Key decisions made regarding budget and timeline.",
+        overall_summary=(
+            "Team discussed Q4 planning and resource allocation. "
+            "Key decisions made regarding budget and timeline."
+        ),
         attendees=["John Smith", "Sarah Johnson", "Mike Davis"],
         key_decisions=["Increase marketing budget by 20%", "Launch new feature in Q1 2024"],
         action_items=[
@@ -367,10 +431,10 @@ if __name__ == "__main__":
     
     # Generate markdown report
     markdown_report = generator.generate_report(mock_summary, "markdown")
-    print("Markdown Report:")
-    print(markdown_report[:500] + "...")
+    logger.debug("Markdown Report:")
+    logger.debug(markdown_report[:500] + "...")
     
     # Generate text report
     text_report = generator.generate_report(mock_summary, "text")
-    print("\nText Report:")
-    print(text_report[:500] + "...")
+    logger.debug("Text Report:")
+    logger.debug(text_report[:500] + "...")

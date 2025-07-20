@@ -4,7 +4,7 @@ Meeting Minutes Summarizer
 A Python package for converting meeting transcripts into structured meeting minutes.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "Elijah Muessemeyer"
 
 from .main import MeetingMinutesProcessor, ProcessingConfig

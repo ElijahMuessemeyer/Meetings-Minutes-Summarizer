@@ -5,10 +5,13 @@ Advanced extraction and structuring of action items from meeting transcripts.
 Identifies tasks, owners, deadlines, and priorities with high accuracy.
 """
 
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 import re
+import logging
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -302,7 +305,10 @@ if __name__ == "__main__":
     speakers = ["John Smith", "Sarah Johnson", "Mike Davis"]
     actions = extractor.extract_action_items(sample_text, speakers)
     
-    print(f"Found {len(actions)} action items:")
+    logger.info(f"Found {len(actions)} action items:")
     for action in actions:
-        print(f"- {action.task} (Owner: {action.owner}, Deadline: {action.deadline}, Priority: {action.priority})")
-        print(f"  Confidence: {action.confidence:.2f}")
+        logger.debug(
+            f"- {action.task} (Owner: {action.owner}, "
+            f"Deadline: {action.deadline}, Priority: {action.priority})"
+        )
+        logger.debug(f"  Confidence: {action.confidence:.2f}")
